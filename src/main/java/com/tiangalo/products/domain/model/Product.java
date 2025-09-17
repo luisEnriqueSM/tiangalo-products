@@ -1,62 +1,60 @@
 package com.tiangalo.products.domain.model;
 
 import java.util.Objects;
+import java.util.Optional;
 
-public final class Product {
-    private final String id;                       // product_id
-    private final ProductCategory category;        // optional
-    private final Integer nameLength;              // as per dataset
-    private final Integer descriptionLength;       // as per dataset
-    private final Integer photosQty;
-    private final Integer weightGrams;
-    private final Dimensions dimensions;
+public class Product {
+    private final ProductId id;
+    private final CategoryId categoryId;
+    private final String title;          // Puedes derivarlo o mapearlo desde una fuente externa si lo deseas
+    private final String description;    // Idem
+    private final int photosQty;
+    private final WeightGrams weight;
+    private final DimensionsCm dimensions;
+    private final SKU sku;               // Opcional si decides generarlo
 
-    private Product(Builder b) {
-        this.id = Objects.requireNonNull(b.id, "id");
-        this.category = b.category;
-        this.nameLength = b.nameLength;
-        this.descriptionLength = b.descriptionLength;
-        this.photosQty = b.photosQty;
-        this.weightGrams = b.weightGrams;
-        this.dimensions = b.dimensions;
+    private Product(ProductId id,
+                    CategoryId categoryId,
+                    String title,
+                    String description,
+                    int photosQty,
+                    WeightGrams weight,
+                    DimensionsCm dimensions,
+                    SKU sku) {
+
+        if (id == null) throw new IllegalArgumentException("id nulo");
+        if (categoryId == null) throw new IllegalArgumentException("categoryId nulo");
+        if (photosQty < 0) throw new IllegalArgumentException("photosQty negativo");
+        this.id = id;
+        this.categoryId = categoryId;
+        this.title = (title == null) ? "" : title.trim();
+        this.description = (description == null) ? "" : description.trim();
+        this.photosQty = photosQty;
+        this.weight = Objects.requireNonNullElse(weight, WeightGrams.of(0));
+        this.dimensions = Objects.requireNonNullElse(dimensions, DimensionsCm.of(0,0,0));
+        this.sku = sku; // puede ser null si no lo manejas aún
     }
 
-    public static Builder builder(String id) { return new Builder(id); }
-
-    public String getId() { return id; }
-    public ProductCategory getCategory() { return category; }
-    public Integer getNameLength() { return nameLength; }
-    public Integer getDescriptionLength() { return descriptionLength; }
-    public Integer getPhotosQty() { return photosQty; }
-    public Integer getWeightGrams() { return weightGrams; }
-    public Dimensions getDimensions() { return dimensions; }
-
-    @Override public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Product)) return false;
-        return id.equals(((Product)o).id);
+    public static Product create(ProductId id,
+                                 CategoryId categoryId,
+                                 String title,
+                                 String description,
+                                 int photosQty,
+                                 WeightGrams weight,
+                                 DimensionsCm dimensions,
+                                 SKU sku){
+        return new Product(id, categoryId, title, description, photosQty, weight, dimensions, sku);
     }
-    @Override public int hashCode() { return Objects.hash(id); }
-    @Override public String toString() { return "Product{" + id + "}"; }
 
-    public static final class Builder {
-        private final String id;
-        private ProductCategory category;
-        private Integer nameLength;
-        private Integer descriptionLength;
-        private Integer photosQty;
-        private Integer weightGrams;
-        private Dimensions dimensions;
+    public ProductId id(){ return id; }
+    public CategoryId categoryId(){ return categoryId; }
+    public String title(){ return title; }
+    public String description(){ return description; }
+    public int photosQty(){ return photosQty; }
+    public WeightGrams weight(){ return weight; }
+    public DimensionsCm dimensions(){ return dimensions; }
+    public Optional<SKU> sku(){ return Optional.ofNullable(sku); }
 
-        private Builder(String id) { this.id = id; }
-
-        public Builder category(ProductCategory category) { this.category = category; return this; }
-        public Builder nameLength(Integer v) { this.nameLength = v; return this; }
-        public Builder descriptionLength(Integer v) { this.descriptionLength = v; return this; }
-        public Builder photosQty(Integer v) { this.photosQty = v; return this; }
-        public Builder weightGrams(Integer v) { this.weightGrams = v; return this; }
-        public Builder dimensions(Dimensions d) { this.dimensions = d; return this; }
-
-        public Product build() { return new Product(this); }
-    }
+    // Reglas de negocio de ejemplo:
+    public boolean isShippable(){ return !weight.isZero() && dimensions.volumeCm3() > 0; }
 }

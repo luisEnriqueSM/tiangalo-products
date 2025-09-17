@@ -1,72 +1,34 @@
 package com.tiangalo.products.domain.model;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import java.util.*;
 
 public class Category {
+    private final CategoryId id;     // Ej: "bed_bath_table"
+    private final Slug slug;         // Normalizado
+    private final List<LocalizedName> translations; // pt-BR, en-US, es-MX, etc.
 
-    private UUID id;
-    private String code;
-    private String parent_id;
-    private Boolean is_active;
-    private LocalDate created_at;
-    private LocalDate updated_at;
-
-    public Category(UUID id, String code, String parent_id, Boolean is_active, LocalDate created_at,
-            LocalDate updated_at) {
+    private Category(CategoryId id, Slug slug, List<LocalizedName> translations){
+        if (translations == null || translations.isEmpty())
+            throw new IllegalArgumentException("Category debe tener al menos 1 traducción");
         this.id = id;
-        this.code = code;
-        this.parent_id = parent_id;
-        this.is_active = is_active;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
+        this.slug = slug;
+        // copiamos inmutable
+        this.translations = List.copyOf(new LinkedList<>(translations));
     }
 
-    public UUID getId() {
-        return id;
+    public static Category create(CategoryId id, Slug slug, List<LocalizedName> translations){
+        return new Category(id, slug, translations);
     }
 
-    public String getCode() {
-        return code;
+    public CategoryId id(){ return id; }
+    public Slug slug(){ return slug; }
+
+    public Optional<LocalizedName> nameForLocale(Locale locale){
+        return translations.stream()
+                .filter(t -> t.locale().getLanguage().equals(locale.getLanguage()))
+                .findFirst()
+                .or(() -> translations.stream().findFirst());
     }
 
-    public String getParent_id() {
-        return parent_id;
-    }
-
-    public Boolean getIs_active() {
-        return is_active;
-    }
-
-    public LocalDate getCreated_at() {
-        return created_at;
-    }
-
-    public LocalDate getUpdated_at() {
-        return updated_at;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public void setParent_id(String parent_id) {
-        this.parent_id = parent_id;
-    }
-
-    public void setIs_active(Boolean is_active) {
-        this.is_active = is_active;
-    }
-
-    public void setCreated_at(LocalDate created_at) {
-        this.created_at = created_at;
-    }
-
-    public void setUpdated_at(LocalDate updated_at) {
-        this.updated_at = updated_at;
-    }
+    public List<LocalizedName> allTranslations(){ return translations; }
 }
