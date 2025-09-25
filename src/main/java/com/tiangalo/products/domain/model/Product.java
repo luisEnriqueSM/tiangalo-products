@@ -6,12 +6,12 @@ import java.util.Optional;
 public class Product {
     private final ProductId id;
     private final CategoryId categoryId;
-    private final String title;          // Puedes derivarlo o mapearlo desde una fuente externa si lo deseas
-    private final String description;    // Idem
+    private final String title;
+    private final String description;
     private final int photosQty;
     private final WeightGrams weight;
     private final DimensionsCm dimensions;
-    private final SKU sku;               // Opcional si decides generarlo
+    private final SKU sku; 
 
     private Product(ProductId id,
                     CategoryId categoryId,
@@ -32,7 +32,7 @@ public class Product {
         this.photosQty = photosQty;
         this.weight = Objects.requireNonNullElse(weight, WeightGrams.of(0));
         this.dimensions = Objects.requireNonNullElse(dimensions, DimensionsCm.of(0,0,0));
-        this.sku = sku; // puede ser null si no lo manejas aún
+        this.sku = sku;
     }
 
     public static Product create(ProductId id,
