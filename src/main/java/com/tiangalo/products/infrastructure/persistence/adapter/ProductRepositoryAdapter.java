@@ -9,7 +9,7 @@ import com.tiangalo.products.domain.model.Product;
 import com.tiangalo.products.domain.repository.ProductRepository;
 
 @Repository
-public class ProductAdapter implements ProductRepository{
+public class ProductRepositoryAdapter implements ProductRepository{
 
     @Override
     public Product save(Product product) {
